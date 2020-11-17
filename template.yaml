@@ -1,0 +1,214 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: This solution deploys an Amazon Kinesis Data Stream and Kinesis Data Analytics for SQL application to analyze CloudFront distribution metrics in real-time and publish to CloudWatch. A CloudWatch dashboard and pre-configured Alarms are deployed as well. 
+Parameters:
+  KinesisStreamShards:
+    Description: Number of shards to provision for the CloudFront Real Time Logs Kinesis Data Stream
+    Type: Number
+    Default: 1
+  RealtimeLogsSamplingPercentage:
+    Description: The sampling rate (expressed as integer or float value between 1-100) to use for the Real-time Logs Configuration. This value will be set in the Real-time Logs Configuration. Defaults to 5 (5%) sampling rate.
+    Type: Number
+    Default: 5
+    MinValue: 1
+    MaxValue: 100
+Resources:
+  LogProcessor:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.8
+      CodeUri: ./log-processor
+      Description: An Amazon Kinesis stream processor to process real-time logs from Amazon CloudFront and convert to CW Metrics
+      MemorySize: 128
+      Timeout: 60
+      Events:
+        KinesisEvent:
+          Type: Kinesis
+          Properties:
+            Stream: !GetAtt CloudFrontLogStream.Arn 
+            StartingPosition: LATEST
+            BatchSize: 1000
+            MaximumBatchingWindowInSeconds: 10
+            Enabled: true
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref RealtimeLogsTable
+      Policies:
+        - Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Action:
+                - kinesis:Get*
+                - kinesis:List*
+                - kinesis:Describe*
+              Resource: !GetAtt CloudFrontLogStream.Arn
+            - Effect: Allow
+              Action: 
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutDestination
+                - logs:PutLogEvents
+              Resource:
+                - !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*'
+            - Effect: Allow
+              Action:
+                - xray:PutTraceSegments
+                - xray:PutTelemetryRecords
+                - xray:GetSamplingRules
+                - xray:GetSamplingTargets
+              Resource: 
+                - '*'
+            - Effect: Allow
+              Action:
+                - timestream:WriteRecords
+              Resource:
+                - !Sub '${CloudFrontLogsTimeSeriesDb.Arn}/table/*'
+            - Effect: Allow
+              Action:
+                - timestream:DescribeEndpoints
+              Resource:
+                - '*'
+
+  CustomResourceHelper:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.8
+      CodeUri: ./custom-resource
+      Description: Custom Resource function to assist with CloudFormation deployment process
+      MemorySize: 128
+      Timeout: 60
+      Policies:
+        - Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Action: 
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutDestination
+                - logs:PutLogEvents
+              Resource:
+                - !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*'
+            - Effect: Allow
+              Action:
+                - xray:PutTraceSegments
+                - xray:PutTelemetryRecords
+                - xray:GetSamplingRules
+                - xray:GetSamplingTargets
+              Resource: 
+                - '*'
+  
+  CloudFrontRealtimeLogConfig:
+    Type: AWS::CloudFront::RealtimeLogConfig
+    Properties:
+      Name: !Sub 'CloudFrontRealTimeLogConfig-${AWS::StackName}'
+      SamplingRate: !Ref RealtimeLogsSamplingPercentage
+      EndPoints:
+        - KinesisStreamConfig:
+            RoleArn: !GetAtt CloudFrontRealTimeLogsConfigRole.Arn
+            StreamArn: !GetAtt CloudFrontLogStream.Arn
+          StreamType: Kinesis
+      Fields:
+        - timestamp
+        - c-ip
+        - time-to-first-byte
+        - sc-status
+        - sc-bytes
+        - cs-method
+        - cs-protocol
+        - cs-host
+        - cs-uri-stem
+        - cs-bytes
+        - x-edge-location
+        - x-edge-request-id
+        - x-host-header
+        - time-taken
+        - cs-protocol-version
+        - c-ip-version
+        - cs-user-agent
+        - cs-referer
+        - cs-cookie
+        - cs-uri-query
+        - x-edge-response-result-type
+        - x-forwarded-for
+        - ssl-protocol
+        - ssl-cipher
+        - x-edge-result-type
+        - fle-encrypted-fields
+        - fle-status
+        - sc-content-type
+        - sc-content-len
+        - sc-range-start
+        - sc-range-end
+        - c-port
+        - x-edge-detailed-result-type
+        - c-country
+        - cs-accept-encoding
+        - cs-accept
+        - cache-behavior-path-pattern
+        - cs-headers
+        - cs-header-names
+        - cs-headers-count
+
+  # IAM Role for CloudFront to deliver real-time logs to Kinesis Data Stream
+  CloudFrontRealTimeLogsConfigRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - cloudfront.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - kinesis:PutRecord
+                  - kinesis:PutRecords
+                  - kinesis:DescribeStreamSummary
+                  - kinesis:DescribeStream
+                Resource: 
+                  - !GetAtt CloudFrontLogStream.Arn    
+  
+  LogProcessorLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${LogProcessor}'
+      RetentionInDays: 30
+ 
+  CloudFrontLogStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      ShardCount: !Ref KinesisStreamShards
+  
+  CloudFrontLogsTimeSeriesDb:
+    Type: AWS::Timestream::Database
+  
+  RealtimeLogsTable:
+    Type: AWS::Timestream::Table
+    Properties:
+      DatabaseName: !Ref CloudFrontLogsTimeSeriesDb
+      RetentionProperties:
+        MemoryStoreRetentionPeriodInHours: 24
+        MagneticStoreRetentionPeriodInDays: 7
+          
+Outputs:
+  CloudWatchMetricsUrl:
+    Description: Link to the Amazon CloudWatch namespace where the custom metrics are published by the solution.
+    Value: !Sub 'https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#metricsV2:graph=~();query=${AWS::StackName}'
+  LogProcessorLogGroup:
+    Description: Link to the CloudWatch Log Group for the log processor lambda function where logs are delivered
+    Value: !Sub 'https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#logsV2:log-groups/log-group/$252Faws$252Flambda$252F${LogProcessor}'
+  TimestreamQueryEditor:
+    Description: Link to the Amazon Timestream query editor for the database that was deployed by the solution
+    Value: !Sub 'https://console.aws.amazon.com/timestream/home?region=${AWS::Region}#query-editor:/Database/${CloudFrontLogsTimeSeriesDb}'
+    

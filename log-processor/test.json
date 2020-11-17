@@ -1,0 +1,85 @@
+{
+    "timestamp": 1602646738.145,
+    "c-ip": "1.2.3.4",
+    "time-to-first-byte": 0.002,
+    "sc-status": 200,
+    "sc-bytes": 16653,
+    "cs-method": "GET",
+    "cs-protocol": "https",
+    "cs-host": "somehost123.cloudfront.net",
+    "cs-uri-stem": "/image.jpg",
+    "cs-bytes": 59,
+    "x-edge-location": "IAD66-C1",
+    "x-edge-request-id": "boNb1al7B50G5T7jXDOGi2zlYAF2VWrba2fnZWfucsomething12345_UA==",
+    "x-host-header": "somehost123.cloudfront.net",
+    "time-taken": 0.002,
+    "cs-protocol-version": "HTTP/2.0",
+    "c-ip-version": "IPv4",
+    "cs-user-agent": "curl/7.53.1",
+    "cs-referer": "-",
+    "cs-cookie": "-",
+    "cs-uri-query": "-",
+    "x-edge-response-result-type": "Hit",
+    "x-forwarded-for": "-",
+    "ssl-protocol": "TLSv1.2",
+    "ssl-cipher": "ECDHE-RSA-AES128-GCM-SHA256",
+    "x-edge-result-type": "Hit",
+    "fle-encrypted-fields": "-",
+    "fle-status": "-",
+    "sc-content-type": "image/jpeg",
+    "sc-content-len": 16335,
+    "sc-range-start": "-",
+    "sc-range-end": "-",
+    "c-port": 36242,
+    "x-edge-detailed-result-type": "Hit",
+    "c-country": "US",
+    "cs-accept-encoding": "-",
+    "cs-accept": "*/*",
+    "cache-behavior-path-pattern": "*",
+    "cs-headers": [
+        {
+            "Name": "host",
+            "Value": "somehost123.cloudfront.net"
+        },
+        {
+            "Name": "user-agent",
+            "Value": "curl/7.53.1"
+        },
+        {
+            "Name": "accept",
+            "Value": "*/*"
+        },
+        {
+            "Name": "CloudFront-Is-Mobile-Viewer",
+            "Value": "false"
+        },
+        {
+            "Name": "CloudFront-Is-Tablet-Viewer",
+            "Value": "false"
+        },
+        {
+            "Name": "CloudFront-Is-SmartTV-Viewer",
+            "Value": "false"
+        },
+        {
+            "Name": "CloudFront-Is-Desktop-Viewer",
+            "Value": "true"
+        },
+        {
+            "Name": "CloudFront-Viewer-Country",
+            "Value": "US"
+        }
+    ],
+    "cs-header-names": [
+        "host",
+        "user-agent",
+        "accept",
+        "CloudFront-Is-Mobile-Viewer",
+        "CloudFront-Is-Tablet-Viewer",
+        "CloudFront-Is-SmartTV-Viewer",
+        "CloudFront-Is-Desktop-Viewer",
+        "CloudFront-Viewer-Country"
+    ],
+    "cs-headers-count": 8,
+    "timestamp_utc": "2020-10-14T03:38:58"
+}
