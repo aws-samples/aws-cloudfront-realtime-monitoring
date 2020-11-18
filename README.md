@@ -136,6 +136,8 @@ Grafana is a popular open-source tool for analytics and monitoring and can be ea
 4. Once saved, you can add this to a Grafana dashboard as a `Graph` visualization type as shown below:
 	![Grafana Dashboard](./grafana-dashboard-example.png "Monitor with Grafana")
 
+	> Note: Your graph will probably look more exciting than this example. This is a simple example of a single small file that is being downloaded by clients.
+
 ## Customize the solution (optional)
 
 ### Modify the CloudFront Realtime Log fields
