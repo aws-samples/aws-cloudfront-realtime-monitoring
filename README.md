@@ -117,7 +117,7 @@ The query should return results similar to below:
 ![Timestream](./timestream-query-results.png "Timestream Query Results")
 
 ## Monitor with Grafana (Optional)
-Grafana is a popular open-source tool for analytics and monitoring and can be easily installed on your local machine, or hosted as a server in AWS. Amazon Timestream is [integrated with Timestream as a plugin](https://docs.aws.amazon.com/timestream/latest/developerguide/Grafana.html). 
+Grafana is a popular open-source tool for analytics and monitoring and can be easily installed on your local machine, or hosted as a server in AWS. Amazon Timestream is [integrated with Grafana as a plugin](https://docs.aws.amazon.com/timestream/latest/developerguide/Grafana.html). 
 
 1. Follow the [Grafana instructions](https://grafana.com/docs/grafana/latest/installation/) to install it on your local machine (you can skip this setup if you already have a Grafana deployment).
 2. Install the [Grafana Plugin for Amazon Timestream](https://grafana.com/grafana/plugins/grafana-timestream-datasource) so that the tool can extract time-series metrics as a data source.
