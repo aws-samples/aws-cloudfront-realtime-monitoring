@@ -66,7 +66,7 @@ Build the serverless application using AWS SAM:
 sam build --use-container
 ```
 
-> **Note:** Using the ```--use-container``` flag informs the SAM CLI to build your Lambda Function inside of a local Docker container using the language runtime that is defined for the Lambda function(s) in the template. This helps prevent issues that may occur from building the functions using a local version of Python on your local machiine that is different than the runtime Lambda uses to execute your function in AWS. This process may take a few minutes to execute becasue the appropriate Docker Image(s) need to be pulled to your local machine to execute the build.
+> **Note:** Using the ```--use-container``` flag informs the SAM CLI to build your Lambda Function inside of a local Docker container using the language runtime that is defined for the Lambda function(s) in the template. This helps prevent issues that may occur from building the functions using a local version of Python on your local machine that is different than the runtime Lambda uses to execute your function in AWS. This process may take a few minutes to execute because the appropriate Docker Image(s) need to be pulled to your local machine to execute the build.
 
 ### Deploy
 When you initially deploy the SAM template, be sure to use the ```--guided``` flag as shown below which generates a local configuration file *samconfig.toml* for your SAM project.  This file is ignored by the included *.gitignore*. Future deployments can use the simplified `sam deploy` command which will use the generated configuration file *samconfig.toml*.
@@ -103,7 +103,7 @@ SELECT
     bin(time, 1h) as binned_time,
     SUM(
       CASE WHEN measure_name = 'sc_bytes' THEN measure_value::bigint ELSE NULL END 
-    ) AS avg_bytes_downloaded,
+    ) AS sum_bytes_downloaded,
     "x_edge_location"
 FROM "<TIMESTREAM DATABASE NAME>"."<TIMESTREAM TABLE NAME>"
 WHERE time >= ago(24h)
