@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: This solution deploys an Amazon Kinesis Data Stream and Kinesis Data Analytics for SQL application to analyze CloudFront distribution metrics in real-time and publish to CloudWatch. A CloudWatch dashboard and pre-configured Alarms are deployed as well. 
+Description: This solution deploys a solution for converting CloudFront Realtime Logs into time-series metrics. It deploys an Amazon Kinesis Data Stream, AWS Lambda Function and Amazon Timestream Database.
 Parameters:
   KinesisStreamShards:
     Description: Number of shards to provision for the CloudFront Real Time Logs Kinesis Data Stream
