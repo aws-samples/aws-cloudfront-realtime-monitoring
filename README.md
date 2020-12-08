@@ -12,7 +12,7 @@ This project provides a serverless solution to begin processing CloudFront real-
 
 ## Architecture
 
-![Architecture](./cloudfront-realtime-monitoring.png "Solution Reference Architecture")
+![Architecture](./cloudfront-realtime-monitoring-diagram.png "Solution Reference Architecture")
 
 ## AWS Services
 
