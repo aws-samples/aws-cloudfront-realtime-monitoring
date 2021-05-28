@@ -189,6 +189,9 @@ Resources:
     Type: AWS::Kinesis::Stream
     Properties:
       ShardCount: !Ref KinesisStreamShards
+      StreamEncryption:
+        EncryptionType: KMS
+        KeyId: alias/aws/kinesis
   
   CloudFrontLogsTimeSeriesDb:
     Type: AWS::Timestream::Database
